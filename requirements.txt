@@ -1,7 +1,10 @@
 Django>=5.0
 channels>=4.0
 python-chess>=1.999
+daphne
 
+channels
+channels_redis
 gunicorn
 uvicorn
 whitenoise
