@@ -1,0 +1,8 @@
+Django>=5.0
+channels>=4.0
+python-chess>=1.999
+
+gunicorn
+uvicorn
+whitenoise
+channels_redis

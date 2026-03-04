@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Game #{{ game.id }}{% endblock %}
+
+{% block content %}
+<script>
+  window.__GAME__ = {
+    id: {{ game.id|default:"0" }},
+    role: "{{ role|default_if_none:''|escapejs }}",
+    wsScheme: (location.protocol === "https:" ? "wss" : "ws"),
+  };
+</script>
+
+<div class="game-shell">
+  <!-- TOP: players + clocks -->
+  <div class="game-top card">
+    <div class="player-row">
+      <div class="player-name"><b>White:</b> {{ white_name }}</div>
+      <span id="whiteClock" class="clock">--:--</span>
+    </div>
+
+    <div class="player-row">
+      <div class="player-name"><b>Black:</b> {{ black_name }}</div>
+      <span id="blackClock" class="clock">--:--</span>
+    </div>
+    <a class="btn btn-soft small" href="{% url 'download_pgn' game.id %}">Download PGN</a>
+
+    <div class="you-are muted">You are: <b>{{ role }}</b></div>
+  </div>
+
+  <div class="game-main">
+    <!-- CENTER: board -->
+    <div class="board card">
+      <div id="board" class="board-grid" aria-label="Chess board"></div>
+      <div class="board-hint muted">Drag pieces. Click a piece to highlight legal moves.</div>
+    </div>
+
+    <!-- RIGHT: call + chat -->
+    <div class="side">
+      <div class="call card">
+        <h3>Video / Audio</h3>
+
+        <div class="videos">
+          <video id="localVideo" autoplay playsinline muted></video>
+          <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+
+        <div class="call-actions">
+          <button id="btnMic" class="btn small" type="button">Mute Mic</button>
+          <button id="btnCam" class="btn small" type="button">Camera Off</button>
+          <button id="btnHangup" class="btn small danger" type="button">Hang Up</button>
+        </div>
+        <div class="game-actions-row">
+          <button id="btnResign" class="btn btn-danger-soft" type="button">Resign</button>
+          <button id="btnOfferDraw" class="btn btn-soft" type="button">Offer Draw</button>
+
+          <button id="btnAcceptDraw" class="btn btn-soft" type="button" style="display:none;">Accept Draw</button>
+          <button id="btnDeclineDraw" class="btn btn-soft" type="button" style="display:none;">Decline</button>
+        </div>
+      <div id="drawStatus" class="muted small"></div>
+
+        <div id="callStatus" class="muted">Call: idle</div>
+      </div>
+
+      <div class="chat card">
+        <h3>Chat</h3>
+        <div id="chatBox" class="chat-box"></div>
+
+        <form id="chatForm" class="chat-form">
+          <input
+            id="chatInput"
+            type="text"
+            placeholder="Type message..."
+            maxlength="200"
+            autocomplete="off"
+          />
+          <button class="btn btn-soft" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM: moves -->
+  <div class="moves card">
+    <h3>Moves</h3>
+    <ol id="moveList" class="move-list"></ol>
+    <div id="statusLine" class="muted"></div>
+  </div>
+</div>
+
+<script src="{% static 'js/chess.js' %}"></script>
+<script src="{% static 'js/webrtc.js' %}"></script>
+{% endblock %}

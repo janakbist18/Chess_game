@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}Lobby{% endblock %}
+
+{% block content %}
+<div class="lobby-bg" style="--bg:url('{% static 'images/chess-bg.jpg' %}')">
+  <div class="lobby-wrap">
+
+    <!-- HERO -->
+    <div class="lobby-hero card">
+      <div class="lobby-hero-left">
+        <h1 class="lobby-title">Lobby</h1>
+        <p class="lobby-sub">
+          Create a game, share the invite link, and start playing with video/audio.
+        </p>
+      </div>
+
+      <div class="lobby-hero-right">
+        <a class="btn btn-primary" href="{% url 'create_game' %}">+ Create New Game</a>
+      </div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="card search-card">
+      <div class="search-row">
+        <div>
+          <div class="search-title">Open game by ID</div>
+          <div class="muted small">Example: type <b>4</b> to open Game #4</div>
+        </div>
+
+        <form class="search-form" id="gameSearchForm">
+          <input id="gameIdInput" type="number" min="1" placeholder="Game ID..." required>
+          <button class="btn btn-soft" type="submit">Open</button>
+        </form>
+      </div>
+      <div id="searchError" class="muted small" style="display:none;margin-top:8px;"></div>
+    </div>
+
+    <!-- GRID -->
+    <div class="lobby-grid">
+      <!-- Waiting -->
+      <section class="card lobby-card">
+        <div class="lobby-card-head">
+          <h2>Waiting Games</h2>
+          <span class="pill" id="waitingCount">{{ waiting_games|length }}</span>
+        </div>
+
+        <div id="waitingBox">
+          {% if waiting_games %}
+            <ul class="game-list">
+              {% for g in waiting_games %}
+                <li class="game-row">
+                  <div class="game-meta">
+                    <div class="game-id">Game #{{ g.id }}</div>
+                    <div class="game-info muted">White: <b>{{ g.white.username }}</b></div>
+                    <div class="muted small">
+                      Waiting for opponent… · Created {{ g.created_at|timesince }} ago
+                    </div>
+                  </div>
+
+                  <div class="game-actions">
+                    <a class="btn btn-soft" href="{% url 'join_game' g.id %}">Join</a>
+
+                    <button class="btn btn-soft" type="button"
+                            data-invite="{{ request.scheme }}://{{ request.get_host }}{% url 'join_game' g.id %}">
+                      Copy Invite
+                    </button>
+
+                    {% if g.white_id == user.id and g.status == "WAITING" %}
+                      <form method="post" action="{% url 'delete_game' g.id %}" class="inline">
+                        {% csrf_token %}
+                        <button class="btn btn-danger-soft" type="submit">Delete</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="empty">
+              <div class="empty-title">No waiting games</div>
+              <div class="muted">Create one and invite a friend to join.</div>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- Playing -->
+      <section class="card lobby-card">
+        <div class="lobby-card-head">
+          <h2>Playing Games</h2>
+          <span class="pill" id="playingCount">{{ playing_games|length }}</span>
+        </div>
+
+        <div id="playingBox">
+          {% if playing_games %}
+            <ul class="game-list">
+              {% for g in playing_games %}
+                <li class="game-row">
+                  <div class="game-meta">
+                    <div class="game-id">Game #{{ g.id }}</div>
+                    <div class="game-info muted">
+                      {{ g.white.username }} <span class="vs">vs</span> {{ g.black.username }}
+                    </div>
+                    <div class="muted small">Started {{ g.created_at|timesince }} ago</div>
+                  </div>
+
+                  <div class="game-actions">
+                    <a class="btn btn-soft" href="{% url 'game' g.id %}">Open</a>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="empty">
+              <div class="empty-title">No live games</div>
+              <div class="muted">Join a waiting game to start playing.</div>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="muted small" style="margin-top:10px;">
+      Auto-refresh: updates waiting/playing lists every 3 seconds.
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+</div>
+
+<script>
+  // ---- Search by game id ----
+  const form = document.getElementById("gameSearchForm");
+  const input = document.getElementById("gameIdInput");
+  const err = document.getElementById("searchError");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = parseInt(input.value, 10);
+    if (!id || id < 1) {
+      err.style.display = "block";
+      err.textContent = "Please enter a valid Game ID.";
+      return;
+    }
+    window.location.href = `/chess/game/${id}/`;
+  });
+
+  // ---- Toast ----
+  const toast = document.getElementById("toast");
+  let toastTimer = null;
+
+  function showToast(text){
+    toast.textContent = text;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
+  }
+
+  // ---- Copy invite link ----
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-invite]");
+    if (!btn) return;
+
+    const link = btn.getAttribute("data-invite");
+
+    try {
+      await navigator.clipboard.writeText(link);
+      showToast("Invite link copied ✅");
+    } catch (err) {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = link;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      showToast("Invite link copied ✅");
+    }
+  });
+
+  // ---- Live refresh (simple polling) ----
+  async function refreshLobby() {
+    try {
+      const res = await fetch("/chess/lobby-state/");
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // counts
+      document.getElementById("waitingCount").textContent = data.waiting.length;
+      document.getElementById("playingCount").textContent = data.playing.length;
+
+      // waiting list (simple rendering)
+      const waitingBox = document.getElementById("waitingBox");
+      if (data.waiting.length === 0) {
+        waitingBox.innerHTML = `
+          <div class="empty">
+            <div class="empty-title">No waiting games</div>
+            <div class="muted">Create one and invite a friend to join.</div>
+          </div>
+        `;
+      } else {
+        waitingBox.innerHTML = `
+          <ul class="game-list">
+            ${data.waiting.map(g => {
+              const invite = `${location.origin}/chess/join/${g.id}/`;
+              return `
+                <li class="game-row">
+                  <div class="game-meta">
+                    <div class="game-id">Game #${g.id}</div>
+                    <div class="game-info muted">White: <b>${g.white__username}</b></div>
+                    <div class="muted small">Waiting for opponent…</div>
+                  </div>
+                  <div class="game-actions">
+                    <a class="btn btn-soft" href="/chess/join/${g.id}/">Join</a>
+                    <button class="btn btn-soft" type="button" data-invite="${invite}">Copy Invite</button>
+                  </div>
+                </li>
+              `;
+            }).join("")}
+          </ul>
+        `;
+      }
+
+      // playing list
+      const playingBox = document.getElementById("playingBox");
+      if (data.playing.length === 0) {
+        playingBox.innerHTML = `
+          <div class="empty">
+            <div class="empty-title">No live games</div>
+            <div class="muted">Join a waiting game to start playing.</div>
+          </div>
+        `;
+      } else {
+        playingBox.innerHTML = `
+          <ul class="game-list">
+            ${data.playing.map(g => `
+              <li class="game-row">
+                <div class="game-meta">
+                  <div class="game-id">Game #${g.id}</div>
+                  <div class="game-info muted">${g.white__username} <span class="vs">vs</span> ${g.black__username}</div>
+                </div>
+                <div class="game-actions">
+                  <a class="btn btn-soft" href="/chess/game/${g.id}/">Open</a>
+                </div>
+              </li>
+            `).join("")}
+          </ul>
+        `;
+      }
+    } catch (e) {}
+  }
+
+  setInterval(refreshLobby, 3000);
+</script>
+{% endblock %}

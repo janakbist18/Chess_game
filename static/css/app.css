@@ -1,0 +1,120 @@
+:root { --bg:#0b1220; --card:#121b2f; --text:#e8eefc; --muted:#9fb0d0; --accent:#4f8cff; --danger:#ff4f6d; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+a{color:var(--text);text-decoration:none}
+.container{max-width:1100px;margin:18px auto;padding:0 12px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#081024;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand a{font-weight:800}
+.topbar nav a{margin-left:12px;color:var(--muted)}
+.user{color:var(--muted);margin-right:8px}
+
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.btn{display:inline-block;background:var(--accent);color:#071021;border:none;border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer}
+.btn.small{padding:8px 10px;border-radius:10px;font-size:14px}
+.btn.danger{background:var(--danger);color:white}
+.muted{color:var(--muted)}
+.list{list-style:none;padding:0;margin:10px 0}
+.list li{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+label{display:block;margin-top:10px;margin-bottom:6px;color:var(--muted)}
+input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:#0b1220;color:var(--text)}
+
+
+/* ---------- Lobby UI ---------- */
+.lobby-wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.lobby-hero{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px}
+.lobby-title{margin:0;font-size:28px;letter-spacing:.2px}
+.lobby-sub{margin:6px 0 0;color:var(--muted);max-width:560px;line-height:1.5}
+
+.btn-primary{background:var(--accent);color:#071021}
+.btn-soft{
+  background:rgba(79,140,255,.15);
+  color:var(--text);
+  border:1px solid rgba(79,140,255,.25);
+}
+.btn-soft:hover{filter:brightness(1.1)}
+
+.lobby-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width: 900px){ .lobby-grid{grid-template-columns:1fr} }
+
+.lobby-card{padding:16px}
+.lobby-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.lobby-card-head h2{margin:0;font-size:18px}
+.pill{
+  font-size:12px;
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,.10);
+  padding:4px 10px;
+  border-radius:999px;
+}
+
+.game-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.game-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(0,0,0,.12);
+}
+.game-id{font-weight:800}
+.game-info{margin-top:4px}
+.vs{opacity:.7;margin:0 6px}
+
+.empty{padding:18px;border-radius:14px;border:1px dashed rgba(255,255,255,.12);background:rgba(0,0,0,.10)}
+.empty-title{font-weight:800;margin-bottom:6px}
+
+
+/* Lobby background image */
+/* Full-page lobby background */
+
+
+
+/* search bar */
+.search-card{padding:14px}
+.search-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.search-title{font-weight:800}
+.search-form{display:flex;gap:10px;align-items:center}
+.search-form input{
+  width:180px;
+  max-width: 100%;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:#0b1220;
+  color:var(--text);
+}
+.small{font-size:13px}
+
+/* Full-page lobby background */
+.lobby-bg{
+  min-height: calc(100vh - 70px);
+  padding: 26px 14px;
+  background:
+    linear-gradient(180deg, rgba(8,16,36,.92), rgba(8,16,36,.86)),
+    var(--bg) center/cover no-repeat fixed;
+}
+
+/* Delete button */
+.inline{display:inline}
+.btn-danger-soft{
+  background:rgba(255,79,109,.14);
+  color:var(--text);
+  border:1px solid rgba(255,79,109,.25);
+}
+.btn-danger-soft:hover{filter:brightness(1.1)}
+
+/* Toast */
+.toast{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.70);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+.toast.show{opacity: 1}

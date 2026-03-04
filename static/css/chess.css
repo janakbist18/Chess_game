@@ -1,0 +1,109 @@
+.game-shell{display:flex;flex-direction:column;gap:12px}
+.game-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.game-main{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;align-items:start}
+@media (max-width: 900px){
+  .game-main{grid-template-columns:1fr}
+}
+
+.board-grid{
+  width:min(70vw, 520px);
+  aspect-ratio: 1 / 1;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+}
+@media (max-width: 900px){
+  .board-grid{width:100%;}
+}
+
+.square{display:flex;align-items:center;justify-content:center;user-select:none}
+.light{background:#d7e1ff}
+.dark{background:#6a86c6}
+
+.piece{
+  width:90%;
+  height:90%;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  cursor:grab;
+}
+
+.videos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width: 520px){
+  .videos{grid-template-columns:1fr}
+}
+video{
+  width:100%;
+  aspect-ratio: 16/10;
+  background:#000;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.call-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.moves .move-list{margin:0;padding-left:20px}
+.board-hint{margin-top:10px}
+
+
+.chat{margin-top:12px}
+.chat-box{
+  height:180px;
+  overflow:auto;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(0,0,0,.12);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.chat-msg{font-size:14px;line-height:1.35}
+.chat-name{font-weight:800;margin-right:6px}
+.chat-form{display:flex;gap:10px;margin-top:10px}
+.chat-form input{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:#0b1220;
+  color:var(--text);
+}
+
+.clock{
+  margin-left:8px;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  color:var(--muted);
+  font-size:13px;
+}
+
+.hl{
+  outline: 3px solid rgba(79,140,255,.9);
+  outline-offset: -3px;
+}
+
+/* right column wrapper */
+.side{display:flex;flex-direction:column;gap:12px}
+
+/* top players */
+.player-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.player-row:last-child{border-bottom:none}
+.you-are{margin-top:6px}
+
+/* make call+chat stack nicely on mobile */
+@media (max-width: 900px){
+  .side{gap:12px}
+}
+
+.game-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
